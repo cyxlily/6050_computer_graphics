@@ -19,8 +19,11 @@
 #define WIDTH 500
 #define HEIGHT 500
 
-int x_last,y_last;
-int oldx,oldy;
+static int x_first = 0;
+static int y_first = 0;
+static int x_last = 0;
+static int y_last = 0;
+static int mouse_count = 0;
 
 /***************************************************************************/
 
@@ -49,46 +52,61 @@ void write_pixel(int x, int y, double intensity)
 void write_horizontal(int x, int y, double intensity)
 {
 
-        for (x=0;x<=499;x+=1)
-	{
-		write_pixel(x,y,intensity);
-	}	
+    for (x=0;x<=499;x+=1)
+    {
+        write_pixel(x,y,intensity);
+    }	
 }
 
 void write_vertical(int x, int y, double intensity)
 {
-
-        for (y=0;y<=499;y+=1)
-	{
-		write_pixel(x,y,intensity);
-	}	
+    for (y=0;y<=499;y+=1)
+    {
+        write_pixel(x,y,intensity);
+    }	
 }
 
 void write_line_DDA(int x1, int y1, int x2, int y2, double intensity)
 {
-	float m,x_inc,y_inc;
-	int x,y;
-	m=1.0*(y2-y1)/(x2-x1);
-	x=x1;y=y1;
-        //printf(" m is %f\n", m);
-	if(abs(m)<1)
-	{
-		x_inc = 1;
-		y_inc = m;
-        	for (x=x1;x<=x2;x+=x_inc,y+=y_inc)
-		{
-			write_pixel((int)x,(int)y,intensity);
-		}
-	}
-	else
-	{
-		x_inc = 1/m;
-		y_inc = 1;
-		for (y=y1;y<=y2;x+=x_inc,y+=y_inc)
-		{
-			write_pixel((int)x,(int)y,intensity);
-		}
-	}	
+    float m,x_inc,y_inc,x,y;
+    m=1.0*(y2-y1)/(x2-x1);
+    //printf(" m is %f\n", m);
+    if(abs(m)<1)
+    {
+        if(x2<x1)
+        {
+            int c = x1;
+            x1 = x2;
+            x2 = c;
+            int d = y1;
+            y1 = y2;
+            y2 = d;
+        } 
+        y_inc = m;
+        //printf(" y_inc is %f\n", y_inc);
+        for (x=x1,y=y1;x<=x2;x++,y+=y_inc)
+        {
+            write_pixel(round(x),round(y),intensity);
+        }
+    }
+    else
+    {
+        if(y2<y1)
+        {
+            int c = x1;
+            x1 = x2;
+            x2 = c;
+            int d = y1;
+            y1 = y2;
+            y2 = d;
+        }
+        x_inc = 1/m;
+        //printf(" y_inc is %f\n", y_inc);
+        for (x=x1,y=y1;y<=y2;x+=x_inc,y++)
+        {
+            write_pixel(round(x),round(y),intensity);
+        }
+    }	
 }
 
 void write_line_midpoint(int x1, int y1, int x2, int y2, double intensity)
@@ -96,43 +114,62 @@ void write_line_midpoint(int x1, int y1, int x2, int y2, double intensity)
 	float m,d;
 	int x,y,a,b;
 	m=1.0*(y2-y1)/(x2-x1);
-	x=x1;y=y1;
-	a=y1-y2;b=x2-x1;
         //printf(" m is %f\n", m);
 	if(abs(m)<1)
 	{
-        	d=1.0*(b/2+a);
-		for (x=x1;x<=x2;x++)
+		if(x2<x1)
+        	{
+            		int c = x1;
+            		x1 = x2;
+            		x2 = c;
+            		int d = y1;
+            		y1 = y2;
+            		y2 = d;
+        	} 
+		int sig_y = (y2>y1)?1:(-1);
+		a=y2-y1;b=x1-x2;
+        	d=1.0*(a+sig_y*b/2);
+		for (x=x1,y=y1;x<=x2;x++)
 		{
 			write_pixel(x,y,intensity);
-			if(d<0)
+			if(sig_y*d>0)
 			{
 				//printf(" d is %+f\n", d);
-				y++;
-				d=d+a+b;
+				y+=sig_y;
+				d=d+a+sig_y*b;
 			}
 			else
 			{
 				d=d+a;
 			}
-			
 		}
 	}
 	else
 	{
-		d=1.0*(a/2+b);
-		for (y=y1;y<=y2;y++)
+		if(y2<y1)
+       		{
+            		int c = x1;
+            		x1 = x2;
+           	 	x2 = c;
+            		int d = y1;
+            		y1 = y2;
+            		y2 = d;
+        	}
+		int sig_x = (x2>x1)?1:(-1);
+		a=y2-y1;b=x1-x2;
+		d=1.0*(sig_x*a/2+b);
+		for (x=x1,y=y1;y<=y2;y++)
 		{
 			write_pixel(x,y,intensity);
-			if(d<0)
+			if(sig_x*d>0)
 			{
 				//printf(" d is %+f\n", d);
 				d=d+b;
 			}
 			else
 			{
-				x++;
-				d=d+a+b;
+				x+=sig_x;
+				d=d+sig_x*a+b;
 			}
 		}
 	}	
@@ -142,19 +179,20 @@ void write_line_midpoint(int x1, int y1, int x2, int y2, double intensity)
 
 void display ( void )   // Create The Display Function
 {
-
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	      // Clear Screen 
+  if(mouse_count%2==1)
+  {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	      // Clear Screen
+  } 
 
   write_pixel(x_last,y_last,1.0);//<-you can get rid of this call if you like
   // CALL YOUR CODE HERE
   //write_horizontal(x_last,y_last,0.5);
   //write_vertical(x_last,y_last,0.5);
-  if(oldx!=x_last && oldy!=y_last)
+  if(x_first!=x_last || y_first!=y_last)
   {
-    //printf("display oldx,oldy is (%d,%d)\n", oldx,oldy);
-    //printf("display x_last,y_last is (%d,%d)\n", x_last,y_last);
-    //write_line_DDA(oldx,oldy,x_last,y_last,0.5);
-    write_line_midpoint(oldx,oldy,x_last,y_last,0.5);
+    //printf(" x_first,y_first,x_last,y_last is (%d,%d,%d,%d)\n", x_first,y_first,x_last,y_last);
+    //write_line_DDA(x_first,y_first,x_last,y_last,0.5);
+    write_line_midpoint(x_first,y_first,x_last,y_last,0.5);
   }
 
   glutSwapBuffers();                                      // Draw Frame Buffer 
@@ -177,11 +215,19 @@ void mouse(int button, int state, int x, int y)
 	if (mag > 20) {
 		//printf(" oldx,oldy is (%d,%d)\n", oldx,oldy);
 		printf(" x,y is (%d,%d)\n", x,y);
-	}
+		mouse_count++;
+		//printf(" mouse count is %d\n", mouse_count);
+		if(mouse_count%2==1)
+		{
+			x_first = x;
+			y_first = y;
+		}
+		x_last = x;
+		y_last = y;
+	}	
 	oldx = x;
 	oldy = y;
-	x_last = x;
-	y_last = y;
+
 }
  
 /***************************************************************************/
