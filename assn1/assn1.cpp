@@ -250,36 +250,6 @@ void write_ellipse_midpoint(int x1, int y1, int x2, int y2, double intensity)
 	}
 }
 
-void write_ellipse_midpoint_test(int x1, int y1, int x2, int y2, double intensity)
-{
-	float d1,rx,ry,xo,yo;
-	int x,y;
-	xo=(x1+x2)/2;
-	yo=(y1+y2)/2;
-	rx=abs(x2-x1)/2;
-	ry=abs(y2-y1)/2;
-    d1=rx*rx-rx*ry*ry+ry*ry/4;
-	x=rx;y=0;
-	do
-	{
-		write_pixel(xo+x,yo+y,intensity);
-		write_pixel(xo-x,yo+y,intensity);
-		write_pixel(xo-x,yo-y,intensity);
-		write_pixel(xo+x,yo-y,intensity);
-		if(d1<0)
-		{
-			d1=d1+2*rx*rx*y+3*rx*rx;
-		}
-		else
-		{
-			d1=d1-2*ry*ry*x+2*ry*ry+2*rx*rx*y+3*rx*rx;
-			x--;
-		}
-		y++;
-	}
-	while (x>=0);
-}
-
 //***************************************************************************/
 
 void display ( void )   // Create The Display Function
