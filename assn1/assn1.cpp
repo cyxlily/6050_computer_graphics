@@ -175,6 +175,111 @@ void write_line_midpoint(int x1, int y1, int x2, int y2, double intensity)
 	}	
 }
 
+void write_circle_midpoint(int x1, int y1, int x2, int y2, double intensity)
+{
+	float d,r;
+	int x,y;
+    r=sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+    //printf(" sqrt r is %f\n", sqrt(r));
+    d=5/4-r;
+	for (x=r,y=0;y<=r/sqrt(2);y++)
+	{
+		write_pixel(x1+x,y1+y,intensity);
+		write_pixel(x1+y,y1+x,intensity);
+		write_pixel(x1+-y,y1+x,intensity);
+		write_pixel(x1+-x,y1+y,intensity);
+		write_pixel(x1+-x,y1-y,intensity);
+		write_pixel(x1+-y,y1-x,intensity);
+		write_pixel(x1+y,y1-x,intensity);
+		write_pixel(x1+x,y1-y,intensity);
+		if(d<0)
+		{
+			d=d+2*y+3;
+		}
+		else
+		{
+			d=d+2*(y-x)+5;
+			x--;
+		}
+	}
+}
+
+void write_ellipse_midpoint(int x1, int y1, int x2, int y2, double intensity)
+{
+	float d1,d2,rx,ry,xo,yo;
+	int x,y;
+	xo=(x1+x2)/2;
+	yo=(y1+y2)/2;
+	rx=abs(x2-x1)/2;
+	ry=abs(y2-y1)/2;
+    d1=rx*rx-rx*ry*ry+ry*ry/4;
+	for(x=rx,y=0;ry*ry*x>=rx*rx*y;y++)
+	{
+		write_pixel(xo+x,yo+y,intensity);
+		write_pixel(xo-x,yo+y,intensity);
+		write_pixel(xo-x,yo-y,intensity);
+		write_pixel(xo+x,yo-y,intensity);
+		if(d1<0)
+		{
+			d1=d1+2*rx*rx*y+3*rx*rx;
+		}
+		else
+		{
+			d1=d1-2*ry*ry*x+2*ry*ry+2*rx*rx*y+3*rx*rx;
+			x--;
+		}
+	}
+	
+	d2=ry*ry-ry*rx*rx+rx*rx/4;
+	for(x=0,y=ry;ry*ry*x<rx*rx*y;x++)
+	{
+		write_pixel(xo+x,yo+y,intensity);
+		write_pixel(xo-x,yo+y,intensity);
+		write_pixel(xo-x,yo-y,intensity);
+		write_pixel(xo+x,yo-y,intensity);
+		if(d2<0)
+		{
+			d2=d2+2*ry*ry*x+3*ry*ry;
+			
+		}
+		else
+		{
+			d2=d2-2*rx*rx*y+2*rx*rx+2*ry*ry*x+3*ry*ry;
+			y--;
+		}
+	}
+}
+
+void write_ellipse_midpoint_test(int x1, int y1, int x2, int y2, double intensity)
+{
+	float d1,rx,ry,xo,yo;
+	int x,y;
+	xo=(x1+x2)/2;
+	yo=(y1+y2)/2;
+	rx=abs(x2-x1)/2;
+	ry=abs(y2-y1)/2;
+    d1=rx*rx-rx*ry*ry+ry*ry/4;
+	x=rx;y=0;
+	do
+	{
+		write_pixel(xo+x,yo+y,intensity);
+		write_pixel(xo-x,yo+y,intensity);
+		write_pixel(xo-x,yo-y,intensity);
+		write_pixel(xo+x,yo-y,intensity);
+		if(d1<0)
+		{
+			d1=d1+2*rx*rx*y+3*rx*rx;
+		}
+		else
+		{
+			d1=d1-2*ry*ry*x+2*ry*ry+2*rx*rx*y+3*rx*rx;
+			x--;
+		}
+		y++;
+	}
+	while (x>=0);
+}
+
 //***************************************************************************/
 
 void display ( void )   // Create The Display Function
@@ -192,7 +297,9 @@ void display ( void )   // Create The Display Function
   {
     //printf(" x_first,y_first,x_last,y_last is (%d,%d,%d,%d)\n", x_first,y_first,x_last,y_last);
     //write_line_DDA(x_first,y_first,x_last,y_last,0.5);
-    write_line_midpoint(x_first,y_first,x_last,y_last,0.5);
+    //write_line_midpoint(x_first,y_first,x_last,y_last,0.5);
+    //write_circle_midpoint(x_first,y_first,x_last,y_last,0.5);
+	write_ellipse_midpoint(x_first,y_first,x_last,y_last,0.5);
   }
 
   glutSwapBuffers();                                      // Draw Frame Buffer 
@@ -205,8 +312,8 @@ void mouse(int button, int state, int x, int y)
    match the screen, also it remembers where the old value was to avoid multiple
    readings from the same mouse click.  This can cause problems when trying to
    start a line or curve where the last one ended */
-        static int oldx = 0;
-        static int oldy = 0;
+    static int oldx = 0;
+    static int oldy = 0;
 	int mag;
 	
 	y *= -1;  //align y with mouse
