@@ -13,17 +13,22 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
+#include <ctime>
 
 #include <GL/glut.h>   // The GL Utility Toolkit (Glut) Header
 
 #define WIDTH 500
 #define HEIGHT 500
 
-static int x_first = 0;
-static int y_first = 0;
-static int x_last = 0;
-static int y_last = 0;
+static int point_buf = 2;
+static int xpoints[3];
+static int ypoints[3];
+
 static int mouse_count = 0;
+static int mode = 1;
+static int display_flag = 1;
+static float color[3];
 
 /***************************************************************************/
 
@@ -44,6 +49,25 @@ void write_pixel(int x, int y, double intensity)
 {
 
         glColor3f (intensity, intensity, intensity);                 
+        glBegin(GL_POINTS);
+           glVertex3i( x, y, 0);
+        glEnd();	
+}
+
+void random_color()
+{
+	int N = 3;
+	srand(time(NULL));
+	color[0]=rand()%(N+1)/(float)(N+1);
+	color[1]=rand()%(N+1)/(float)(N+1);
+	color[2]=rand()%(N+1)/(float)(N+1);
+}
+
+void write_pixel_color(int x, int y, double c1, double c2, double c3)
+                                         /* Turn on the pixel found at x,y */
+{
+
+        glColor3f (c1, c2, c3);                 
         glBegin(GL_POINTS);
            glVertex3i( x, y, 0);
         glEnd();	
@@ -109,7 +133,7 @@ void write_line_DDA(int x1, int y1, int x2, int y2, double intensity)
     }	
 }
 
-void write_line_midpoint(int x1, int y1, int x2, int y2, double intensity)
+void write_line_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, double c3)
 {
 	float m,d;
 	int x,y,a,b;
@@ -131,7 +155,7 @@ void write_line_midpoint(int x1, int y1, int x2, int y2, double intensity)
         	d=1.0*(a+sig_y*b/2);
 		for (x=x1,y=y1;x<=x2;x++)
 		{
-			write_pixel(x,y,intensity);
+			write_pixel_color(x,y,c1,c2,c3);
 			if(sig_y*d>0)
 			{
 				//printf(" d is %+f\n", d);
@@ -160,7 +184,7 @@ void write_line_midpoint(int x1, int y1, int x2, int y2, double intensity)
 		d=1.0*(sig_x*a/2+b);
 		for (x=x1,y=y1;y<=y2;y++)
 		{
-			write_pixel(x,y,intensity);
+			write_pixel_color(x,y,c1,c2,c3);
 			if(sig_x*d>0)
 			{
 				//printf(" d is %+f\n", d);
@@ -175,7 +199,26 @@ void write_line_midpoint(int x1, int y1, int x2, int y2, double intensity)
 	}	
 }
 
-void write_circle_midpoint(int x1, int y1, int x2, int y2, double intensity)
+void write_rectangle(int x1, int y1, int x2, int y2, double c1, double c2, double c3)
+{
+	int xmin,ymin,xmax,ymax,x,y;
+	xmin = (x1<x2)?x1:x2;
+	xmax = (x2>x1)?x2:x1;
+	ymin = (y1<y2)?y1:y2;
+	ymax = (y2>y1)?y2:y1;
+	for (x=xmin;x<=xmax;x+=1)
+    {
+        write_pixel_color(x,ymin,c1,c2,c3);
+		write_pixel_color(x,ymax,c1,c2,c3);
+    }
+	for (y=ymin;y<=ymax;y+=1)
+    {
+        write_pixel_color(xmin,y,c1,c2,c3);
+		write_pixel_color(xmax,y,c1,c2,c3);
+    }
+}
+
+void write_circle_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, double c3)
 {
 	float d,r;
 	int x,y;
@@ -184,14 +227,14 @@ void write_circle_midpoint(int x1, int y1, int x2, int y2, double intensity)
     d=5/4-r;
 	for (x=r,y=0;y<=r/sqrt(2);y++)
 	{
-		write_pixel(x1+x,y1+y,intensity);
-		write_pixel(x1+y,y1+x,intensity);
-		write_pixel(x1+-y,y1+x,intensity);
-		write_pixel(x1+-x,y1+y,intensity);
-		write_pixel(x1+-x,y1-y,intensity);
-		write_pixel(x1+-y,y1-x,intensity);
-		write_pixel(x1+y,y1-x,intensity);
-		write_pixel(x1+x,y1-y,intensity);
+		write_pixel_color(x1+x,y1+y,c1,c2,c3);
+		write_pixel_color(x1+y,y1+x,c1,c2,c3);
+		write_pixel_color(x1+-y,y1+x,c1,c2,c3);
+		write_pixel_color(x1+-x,y1+y,c1,c2,c3);
+		write_pixel_color(x1+-x,y1-y,c1,c2,c3);
+		write_pixel_color(x1+-y,y1-x,c1,c2,c3);
+		write_pixel_color(x1+y,y1-x,c1,c2,c3);
+		write_pixel_color(x1+x,y1-y,c1,c2,c3);
 		if(d<0)
 		{
 			d=d+2*y+3;
@@ -204,7 +247,7 @@ void write_circle_midpoint(int x1, int y1, int x2, int y2, double intensity)
 	}
 }
 
-void write_ellipse_midpoint(int x1, int y1, int x2, int y2, double intensity)
+void write_ellipse_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, double c3)
 {
 	float d1,d2,rx,ry,xo,yo;
 	int x,y;
@@ -215,10 +258,10 @@ void write_ellipse_midpoint(int x1, int y1, int x2, int y2, double intensity)
     d1=rx*rx-rx*ry*ry+ry*ry/4;
 	for(x=rx,y=0;ry*ry*x>=rx*rx*y;y++)
 	{
-		write_pixel(xo+x,yo+y,intensity);
-		write_pixel(xo-x,yo+y,intensity);
-		write_pixel(xo-x,yo-y,intensity);
-		write_pixel(xo+x,yo-y,intensity);
+		write_pixel_color(xo+x,yo+y,c1,c2,c3);
+		write_pixel_color(xo-x,yo+y,c1,c2,c3);
+		write_pixel_color(xo-x,yo-y,c1,c2,c3);
+		write_pixel_color(xo+x,yo-y,c1,c2,c3);
 		if(d1<0)
 		{
 			d1=d1+2*rx*rx*y+3*rx*rx;
@@ -233,10 +276,10 @@ void write_ellipse_midpoint(int x1, int y1, int x2, int y2, double intensity)
 	d2=ry*ry-ry*rx*rx+rx*rx/4;
 	for(x=0,y=ry;ry*ry*x<rx*rx*y;x++)
 	{
-		write_pixel(xo+x,yo+y,intensity);
-		write_pixel(xo-x,yo+y,intensity);
-		write_pixel(xo-x,yo-y,intensity);
-		write_pixel(xo+x,yo-y,intensity);
+		write_pixel_color(xo+x,yo+y,c1,c2,c3);
+		write_pixel_color(xo-x,yo+y,c1,c2,c3);
+		write_pixel_color(xo-x,yo-y,c1,c2,c3);
+		write_pixel_color(xo+x,yo-y,c1,c2,c3);
 		if(d2<0)
 		{
 			d2=d2+2*ry*ry*x+3*ry*ry;
@@ -254,25 +297,56 @@ void write_ellipse_midpoint(int x1, int y1, int x2, int y2, double intensity)
 
 void display ( void )   // Create The Display Function
 {
-  if(mouse_count%2==1)
-  {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	      // Clear Screen
-  } 
+	if(display_flag==0){
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	      // Clear Screen
+	}
+	else{
+		//write_pixel(xpoints[0],ypoints[0],1.0);//<-you can get rid of this call if you like
+		// CALL YOUR CODE HERE
+		//write_horizontal(x_last,y_last,0.5);
+		//write_vertical(x_last,y_last,0.5);
+//printf(" x_first,y_first,x_last,y_last is (%d,%d,%d,%d)\n", x_first,y_first,x_last,y_last);
+		//write_line_DDA(x_first,y_first,x_last,y_last,0.5);
+		switch ( mode ) {
+			case 1://line
+				if(xpoints[0]!=xpoints[1] || ypoints[0]!=ypoints[1])
+				{
+					write_line_midpoint(xpoints[1],ypoints[1],xpoints[0],ypoints[0],color[0],color[1],color[2]);
+				}
+				break;
+			case 2://rectangle
+				if(xpoints[0]!=xpoints[1] || ypoints[0]!=ypoints[1])
+				{
+					write_rectangle(xpoints[1],ypoints[1],xpoints[0],ypoints[0],color[0],color[1],color[2]);
+				}
+				break;
+			case 3://triangles
+				if(xpoints[2]!=xpoints[1] || ypoints[2]!=ypoints[1])
+				{
+					write_line_midpoint(xpoints[1],ypoints[1],xpoints[2],ypoints[2],color[0],color[1],color[2]);
+				}
+				if(xpoints[0]!=xpoints[1] || ypoints[0]!=ypoints[1])
+				{
+					write_line_midpoint(xpoints[0],ypoints[0],xpoints[1],ypoints[1],color[0],color[1],color[2]);
+					write_line_midpoint(xpoints[0],ypoints[0],xpoints[2],ypoints[2],color[0],color[1],color[2]);
+				}
+				break;
+			case 4://ellipse
+				if(xpoints[0]!=xpoints[1] || ypoints[0]!=ypoints[1])
+				{
+					write_ellipse_midpoint(xpoints[1],ypoints[1],xpoints[0],ypoints[0],color[0],color[1],color[2]);
+				}
+				break;
+			case 5://circle
+				if(xpoints[0]!=xpoints[1] || ypoints[0]!=ypoints[1])
+				{
+					write_circle_midpoint(xpoints[1],ypoints[1],xpoints[0],ypoints[0],color[0],color[1],color[2]);
+				}
+				break;
+		}
 
-  write_pixel(x_last,y_last,1.0);//<-you can get rid of this call if you like
-  // CALL YOUR CODE HERE
-  //write_horizontal(x_last,y_last,0.5);
-  //write_vertical(x_last,y_last,0.5);
-  if(x_first!=x_last || y_first!=y_last)
-  {
-    //printf(" x_first,y_first,x_last,y_last is (%d,%d,%d,%d)\n", x_first,y_first,x_last,y_last);
-    //write_line_DDA(x_first,y_first,x_last,y_last,0.5);
-    //write_line_midpoint(x_first,y_first,x_last,y_last,0.5);
-    //write_circle_midpoint(x_first,y_first,x_last,y_last,0.5);
-	write_ellipse_midpoint(x_first,y_first,x_last,y_last,0.5);
-  }
-
-  glutSwapBuffers();                                      // Draw Frame Buffer 
+	}
+	glutSwapBuffers();                                      // Draw Frame Buffer 
 }
 
 /***************************************************************************/
@@ -290,17 +364,39 @@ void mouse(int button, int state, int x, int y)
 	y += 500; //ignore 
 	mag = (oldx - x)*(oldx - x) + (oldy - y)*(oldy - y);
 	if (mag > 20) {
+		display_flag=1;
 		//printf(" oldx,oldy is (%d,%d)\n", oldx,oldy);
 		printf(" x,y is (%d,%d)\n", x,y);
 		mouse_count++;
 		//printf(" mouse count is %d\n", mouse_count);
-		if(mouse_count%2==1)
+		if(point_buf==2)
 		{
-			x_first = x;
-			y_first = y;
+			if(mouse_count%2==1)
+			{
+				xpoints[1] = x;
+				ypoints[1] = y;
+			}
+			xpoints[0] = x;
+			ypoints[0] = y;
 		}
-		x_last = x;
-		y_last = y;
+		if(point_buf==3)
+		{
+			if(mouse_count%3==1)
+			{
+				xpoints[2] = x;
+				ypoints[2] = y;
+				xpoints[1] = x;
+				ypoints[1] = y;
+			}
+			if(mouse_count%3==2)
+			{
+				xpoints[1] = x;
+				ypoints[1] = y;
+			}
+			xpoints[0] = x;
+			ypoints[0] = y;
+		}
+
 	}	
 	oldx = x;
 	oldy = y;
@@ -315,9 +411,53 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 		case 27:              // When Escape Is Pressed...
 			exit ( 0 );   // Exit The Program
 			break;        
-	        case '1':             // stub for new screen
-		        printf("New screen\n");
+	    case '1':             // stub for new screen
+		    printf("New screen\n");
+			mouse_count = 0;
 			break;
+		case 'l':
+			mode = 1;
+			mouse_count = 0;
+			point_buf = 2;
+			memset(xpoints,0,3*sizeof(int));
+			memset(ypoints,0,3*sizeof(int));
+			random_color();
+			break;
+		case 'r':
+			mode = 2;
+			mouse_count = 0;
+			point_buf = 2;
+			memset(xpoints,0,3*sizeof(int));
+			memset(ypoints,0,3*sizeof(int));
+			random_color();
+			break;
+		case 't':
+			mode = 3;
+			mouse_count = 0;
+			point_buf = 3;
+			memset(xpoints,0,3*sizeof(int));
+			memset(ypoints,0,3*sizeof(int));
+			random_color();
+			break;
+		case 'e':
+			mode = 4;
+			mouse_count = 0;
+			point_buf = 2;
+			memset(xpoints,0,3*sizeof(int));
+			memset(ypoints,0,3*sizeof(int));
+			random_color();
+			break;
+		case 'c':
+			mode =5;
+			mouse_count = 0;
+			point_buf = 2;
+			memset(xpoints,0,3*sizeof(int));
+			memset(ypoints,0,3*sizeof(int));
+			random_color();
+			break;
+		case 'd':
+			display_flag = 0;
+			mouse_count = 0;
 		default:       
 			break;
 	}
@@ -331,15 +471,16 @@ int main (int argc, char *argv[])
    using the escape key.						  */
 	
 	glutInit            ( &argc, argv ); 
-       	glutInitDisplayMode ( GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH ); 
+    glutInitDisplayMode ( GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH ); 
 	glutInitWindowSize  ( 500,500 ); 
 	glutCreateWindow    ( "Computer Graphics" ); 
+	random_color();
 	glutDisplayFunc     ( display );  
 	glutIdleFunc	    ( display );
 	glutMouseFunc       ( mouse );
 	glutKeyboardFunc    ( keyboard );
         					      
-        init_window();				             //create_window
+    init_window();				             //create_window
 						       		
 	glutMainLoop        ( );                 // Initialize The Main Loop
 }
