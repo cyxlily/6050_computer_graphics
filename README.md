@@ -1,6 +1,6 @@
 # computer_graphics
 common computer_graphics
-> Homework of 6050 computer graphics
+> Homework of 6050 Computer Graphics
 
 This repository contains:
 
@@ -15,7 +15,7 @@ This repository contains:
 
 ## Install
 
-This project uses OpenGl.
+This project uses [OpenGl](https://www.opengl.org/) on Ubuntu Linux.
 
 ```sh
 $ sudo apt-get install mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev
@@ -23,13 +23,24 @@ $ sudo apt-get install mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev freeglut
 
 ## Usage
 
-This is a c programmer. You can compile it by:
+This is a C programmer. You can compile and run it as below:
 
 ```sh
+$ cd assn1
 $ make
-$ ./assn
+$ ./assn1
 ```
 
-### Generator
+The default mode is the "line" mode, you can draw lines between two points. Later, You can press "l" key to switch to the "line" mode.
 
-To use the generator, look at [generator-standard-readme](https://github.com/RichardLitt/generator-standard-readme). There is a global executable to run the generator in that package, aliased as `standard-readme`.
+By pressing "r" key, you can switch to the "rectangle" mode and draw rectangles. The two points represent two opposing corners of the rectangle.
+
+Press "t" key, and you can switch to the "triangle" mode. The three mouse clicks are the vertices of the triangle.
+
+The "e" key represent the "ellipse" mode. The two points represent the opposing corners of the rectangles that determin the ellipse.
+
+The "c" key represent the "circle" mode. The first is the center and the next point decide the radius.
+
+Press "d" to clear the window.
+
+
