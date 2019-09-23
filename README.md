@@ -33,14 +33,23 @@ $ ./assn1
 
 The default mode is the "line" mode, you can draw lines between two points. Later, You can press "l" key to switch to the "line" mode.
 
-By pressing "r" key, you can switch to the "rectangle" mode and draw rectangles. The two points represent two opposing corners of the rectangle.
-
-Press "t" key, and you can switch to the "triangle" mode. The three mouse clicks are the vertices of the triangle.
-
-The "e" key represent the "ellipse" mode. The two points represent the opposing corners of the rectangles that determin the ellipse.
-
-The "c" key represent the "circle" mode. The first is the center and the next point decide the radius.
+![image](https://github.com/cyxlily/computer_graphics/blob/master/assn1/line.png)
 
 Press "d" to clear the window.
 
+By pressing "r" key, you can switch to the "rectangle" mode and draw rectangles. The two points represent two opposing corners of the rectangle.
+
+![image](https://github.com/cyxlily/computer_graphics/blob/master/assn1/rectangle.png)
+
+Press "t" key, and you can switch to the "triangle" mode. The three mouse clicks are the vertices of the triangle.
+
+![image](https://github.com/cyxlily/computer_graphics/blob/master/assn1/triangle.png)
+
+The "e" key represent the "ellipse" mode. The two points represent the opposing corners of the rectangles that determin the ellipse.
+
+![image](https://github.com/cyxlily/computer_graphics/blob/master/assn1/ellipse.png)
+
+The "c" key represent the "circle" mode. The first is the center and the next point decide the radius.
+
+![image](https://github.com/cyxlily/computer_graphics/blob/master/assn1/circle.png)
 
