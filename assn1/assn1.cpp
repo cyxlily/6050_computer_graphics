@@ -21,12 +21,12 @@
 #define WIDTH 500
 #define HEIGHT 500
 
-static int point_buf = 2;
-static int xpoints[3];
+static int point_buf = 2;//default 2, triangle 3
+static int xpoints[3];//[0]:lastest point
 static int ypoints[3];
 
 static int mouse_count = 0;
-static int mode = 1;
+static int mode = 1;//default draw line
 static int display_flag = 1;
 static float color[3];
 
@@ -54,7 +54,7 @@ void write_pixel(int x, int y, double intensity)
         glEnd();	
 }
 
-void random_color()
+void random_color()//get random color
 {
 	int N = 3;
 	srand(time(NULL));
@@ -63,7 +63,7 @@ void random_color()
 	color[2]=rand()%(N+1)/(float)(N+1);
 }
 
-void write_pixel_color(int x, int y, double c1, double c2, double c3)
+void write_pixel_color(int x, int y, double c1, double c2, double c3)//draw pixel with color
                                          /* Turn on the pixel found at x,y */
 {
 
@@ -73,7 +73,7 @@ void write_pixel_color(int x, int y, double c1, double c2, double c3)
         glEnd();	
 }
 
-void write_horizontal(int x, int y, double intensity)
+void write_horizontal(int x, int y, double intensity)//draw horizontal line
 {
 
     for (x=0;x<=499;x+=1)
@@ -82,7 +82,7 @@ void write_horizontal(int x, int y, double intensity)
     }	
 }
 
-void write_vertical(int x, int y, double intensity)
+void write_vertical(int x, int y, double intensity)//draw vertical line
 {
     for (y=0;y<=499;y+=1)
     {
@@ -90,10 +90,10 @@ void write_vertical(int x, int y, double intensity)
     }	
 }
 
-void write_line_DDA(int x1, int y1, int x2, int y2, double intensity)
+void write_line_DDA(int x1, int y1, int x2, int y2, double intensity)//draw line between (x1,y1) and(x2,y2) with DDA algorithm
 {
     float m,x_inc,y_inc,x,y;
-    m=1.0*(y2-y1)/(x2-x1);
+    m=1.0*(y2-y1)/(x2-x1);//slope
     //printf(" m is %f\n", m);
     if(abs(m)<1)
     {
@@ -133,11 +133,11 @@ void write_line_DDA(int x1, int y1, int x2, int y2, double intensity)
     }	
 }
 
-void write_line_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, double c3)
+void write_line_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, double c3)//draw line with midpoint algorithm
 {
 	float m,d;
 	int x,y,a,b;
-	m=1.0*(y2-y1)/(x2-x1);
+	m=1.0*(y2-y1)/(x2-x1);//slope
         //printf(" m is %f\n", m);
 	if(abs(m)<1)
 	{
@@ -149,7 +149,7 @@ void write_line_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, d
             		int d = y1;
             		y1 = y2;
             		y2 = d;
-        	} 
+        	} //make sure x1<x2,else exchange
 		int sig_y = (y2>y1)?1:(-1);
 		a=y2-y1;b=x1-x2;
         	d=1.0*(a+sig_y*b/2);
@@ -178,7 +178,7 @@ void write_line_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, d
             		int d = y1;
             		y1 = y2;
             		y2 = d;
-        	}
+        	}//make sure y1<y2,else exchange
 		int sig_x = (x2>x1)?1:(-1);
 		a=y2-y1;b=x1-x2;
 		d=1.0*(sig_x*a/2+b);
@@ -199,7 +199,7 @@ void write_line_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, d
 	}	
 }
 
-void write_rectangle(int x1, int y1, int x2, int y2, double c1, double c2, double c3)
+void write_rectangle(int x1, int y1, int x2, int y2, double c1, double c2, double c3)//draw rectangle
 {
 	int xmin,ymin,xmax,ymax,x,y;
 	xmin = (x1<x2)?x1:x2;
@@ -218,7 +218,7 @@ void write_rectangle(int x1, int y1, int x2, int y2, double c1, double c2, doubl
     }
 }
 
-void write_circle_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, double c3)
+void write_circle_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, double c3)//draw circle with midpoint algorithm
 {
 	float d,r;
 	int x,y;
@@ -247,7 +247,7 @@ void write_circle_midpoint(int x1, int y1, int x2, int y2, double c1, double c2,
 	}
 }
 
-void write_ellipse_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, double c3)
+void write_ellipse_midpoint(int x1, int y1, int x2, int y2, double c1, double c2, double c3)//draw ellipse with midpoint algorithm
 {
 	float d1,d2,rx,ry,xo,yo;
 	int x,y;
@@ -415,7 +415,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 		    printf("New screen\n");
 			mouse_count = 0;
 			break;
-		case 'l':
+		case 'l'://line
 			mode = 1;
 			mouse_count = 0;
 			point_buf = 2;
@@ -423,7 +423,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			memset(ypoints,0,3*sizeof(int));
 			random_color();
 			break;
-		case 'r':
+		case 'r'://rectangle
 			mode = 2;
 			mouse_count = 0;
 			point_buf = 2;
@@ -431,7 +431,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			memset(ypoints,0,3*sizeof(int));
 			random_color();
 			break;
-		case 't':
+		case 't'://triangle
 			mode = 3;
 			mouse_count = 0;
 			point_buf = 3;
@@ -439,7 +439,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			memset(ypoints,0,3*sizeof(int));
 			random_color();
 			break;
-		case 'e':
+		case 'e'://ellipse
 			mode = 4;
 			mouse_count = 0;
 			point_buf = 2;
@@ -447,7 +447,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			memset(ypoints,0,3*sizeof(int));
 			random_color();
 			break;
-		case 'c':
+		case 'c'://circle
 			mode =5;
 			mouse_count = 0;
 			point_buf = 2;
@@ -455,9 +455,11 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			memset(ypoints,0,3*sizeof(int));
 			random_color();
 			break;
-		case 'd':
+		case 'd'://clear screen
 			display_flag = 0;
 			mouse_count = 0;
+			memset(xpoints,0,3*sizeof(int));
+			memset(ypoints,0,3*sizeof(int));
 		default:       
 			break;
 	}
