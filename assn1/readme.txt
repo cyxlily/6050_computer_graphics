@@ -1,6 +1,6 @@
 Contents:
 
-	It's a C program to draw colorful lines, rectangles, triangles, ellipses and circles.
+	It's a C program to draw colorful lines, rectangles, triangles, ellipses and circles with DDA and midpoint algorithm.
 
 Install:
 
