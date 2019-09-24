@@ -14,7 +14,7 @@ Compile:
 
 Usage:
 
-	1. The default color is white, you can choose color from the color bar at the bottom right corner of the window and draw the next shape with this color.
+	1. The default color is white, you can choose color from the color bar at the bottom left corner of the window and draw the next shape with this color.
 
 	2. Press "l" to draw lines. The default mode is the "line" mode, you can draw lines between two click points. Later, You can press "l" key to switch to the "line" mode.
 
