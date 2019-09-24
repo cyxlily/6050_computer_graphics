@@ -28,7 +28,8 @@ static int ypoints[3];
 static int mouse_count = 0;
 static int mode = 1;//default draw line
 static int display_flag = 1;
-static float color[3];
+static float color_buf[3]={1,1,1};
+static float color[3]={1,1,1};
 
 /***************************************************************************/
 
@@ -293,12 +294,38 @@ void write_ellipse_midpoint(int x1, int y1, int x2, int y2, double c1, double c2
 	}
 }
 
+void color_bar()
+{
+	int x,y;
+	float i,j,k;
+	float color_inc = 0.1;
+	int count = 0;
+	y=10;
+    for(i=1;i>0;i-=color_inc,y++)
+	{
+		x=10;
+		for(j=1;j>0;j-=color_inc,x++)
+		{
+			for(k=1;k>0;k-=color_inc,count++,x++)
+			{
+				write_pixel_color(x,y,i,j,k);
+				//printf("***x: %d,y: %d,c1: %f,c2: %f,c3: %f***",x,y,i,j,k);
+
+			}
+            x--;
+		}
+	}
+	//printf("***x: %d,y: %d,c1: %f,c2: %f,c3: %f***",x,y,i,j,k);
+}
+
 //***************************************************************************/
 
 void display ( void )   // Create The Display Function
 {
+	color_bar();
 	if(display_flag==0){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	      // Clear Screen
+		color_bar();
 	}
 	else{
 		//write_pixel(xpoints[0],ypoints[0],1.0);//<-you can get rid of this call if you like
@@ -359,42 +386,60 @@ void mouse(int button, int state, int x, int y)
     static int oldx = 0;
     static int oldy = 0;
 	int mag;
+	int color_x1,color_x2;
 	
 	y *= -1;  //align y with mouse
 	y += 500; //ignore 
 	mag = (oldx - x)*(oldx - x) + (oldy - y)*(oldy - y);
 	if (mag > 20) {
 		display_flag=1;
-		//printf(" oldx,oldy is (%d,%d)\n", oldx,oldy);
-		printf(" x,y is (%d,%d)\n", x,y);
-		mouse_count++;
-		//printf(" mouse count is %d\n", mouse_count);
-		if(point_buf==2)
+		if(x>=10&&x<=110&&y>=10&&y<=20)//in color bar
 		{
-			if(mouse_count%2==1)
-			{
-				xpoints[1] = x;
-				ypoints[1] = y;
-			}
-			xpoints[0] = x;
-			ypoints[0] = y;
+			color_buf[0]=1-1.0*(y-10)/10;
+			color_x1=(x-10)%10;
+			color_x2=(x-10-color_x1)/10;
+			color_buf[1]=1-1.0*color_x2/10;
+			color_buf[2]=1-1.0*color_x1/10;//10,1,1;11,1,0.9;20,0.9,1;21,0.9,0.9
+			printf(" color is (%f,%f,%f)\n", color_buf[0],color_buf[1],color_buf[2]);
+			//printf("refer x,y is (%d,%d)\n", x,y);
 		}
-		if(point_buf==3)
+		else
 		{
-			if(mouse_count%3==1)
+			//printf(" oldx,oldy is (%d,%d)\n", oldx,oldy);
+			printf(" x,y is (%d,%d)\n", x,y);
+			mouse_count++;
+			color[0]=color_buf[0];
+			color[1]=color_buf[1];
+			color[2]=color_buf[2];
+			//printf(" mouse count is %d\n", mouse_count);
+		
+			if(point_buf==2)
 			{
-				xpoints[2] = x;
-				ypoints[2] = y;
-				xpoints[1] = x;
-				ypoints[1] = y;
+				if(mouse_count%2==1)
+				{
+					xpoints[1] = x;
+					ypoints[1] = y;
+				}
+				xpoints[0] = x;
+				ypoints[0] = y;
 			}
-			if(mouse_count%3==2)
+			if(point_buf==3)
 			{
-				xpoints[1] = x;
-				ypoints[1] = y;
+				if(mouse_count%3==1)
+				{
+					xpoints[2] = x;
+					ypoints[2] = y;
+					xpoints[1] = x;
+					ypoints[1] = y;
+				}
+				if(mouse_count%3==2)
+				{
+					xpoints[1] = x;
+					ypoints[1] = y;
+				}
+				xpoints[0] = x;
+				ypoints[0] = y;
 			}
-			xpoints[0] = x;
-			ypoints[0] = y;
 		}
 
 	}	
@@ -421,7 +466,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			point_buf = 2;
 			memset(xpoints,0,3*sizeof(int));
 			memset(ypoints,0,3*sizeof(int));
-			random_color();
+			//random_color();
 			break;
 		case 'r'://rectangle
 			mode = 2;
@@ -429,7 +474,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			point_buf = 2;
 			memset(xpoints,0,3*sizeof(int));
 			memset(ypoints,0,3*sizeof(int));
-			random_color();
+			//random_color();
 			break;
 		case 't'://triangle
 			mode = 3;
@@ -437,7 +482,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			point_buf = 3;
 			memset(xpoints,0,3*sizeof(int));
 			memset(ypoints,0,3*sizeof(int));
-			random_color();
+			//random_color();
 			break;
 		case 'e'://ellipse
 			mode = 4;
@@ -445,7 +490,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			point_buf = 2;
 			memset(xpoints,0,3*sizeof(int));
 			memset(ypoints,0,3*sizeof(int));
-			random_color();
+			//random_color();
 			break;
 		case 'c'://circle
 			mode =5;
@@ -453,7 +498,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			point_buf = 2;
 			memset(xpoints,0,3*sizeof(int));
 			memset(ypoints,0,3*sizeof(int));
-			random_color();
+			//random_color();
 			break;
 		case 'd'://clear screen
 			display_flag = 0;
@@ -476,7 +521,7 @@ int main (int argc, char *argv[])
     glutInitDisplayMode ( GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH ); 
 	glutInitWindowSize  ( 500,500 ); 
 	glutCreateWindow    ( "Computer Graphics" ); 
-	random_color();
+	//random_color();
 	glutDisplayFunc     ( display );  
 	glutIdleFunc	    ( display );
 	glutMouseFunc       ( mouse );
