@@ -1,3 +1,7 @@
+6050 Computer Graphics
+assn1
+Yuxin Cui
+
 Contents:
 
 	It's a C program to draw colorful lines, rectangles, triangles, ellipses and circles with DDA and midpoint algorithm.
