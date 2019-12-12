@@ -1,10 +1,10 @@
 # computer_graphics
-computer_graphics
+common computer_graphics
 > Homework of 6050 Computer Graphics
 
 This repository contains:
 
-assn1: a C program to draw colorful lines, rectangles, triangles, ellipses and circles with DDA and midpoint algorithm.
+1. assn1: a C program to draw colorful lines, rectangles, triangles, ellipses and circles with DDA and midpoint algorithm.
 
 ## Table of Contents
 
